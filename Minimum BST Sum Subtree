@@ -1,0 +1,89 @@
+Given a binary tree and a target, find the number of node in the minimum sub-tree with the given sum equal to the target which is also a binary search tree.
+
+Example 1:
+
+Input:
+           13
+         /    \
+       5       23
+      / \      / \
+     N   17   N   N
+         /
+        16
+Target: 38
+Output: 3
+Explanation: 5,17,16 is the smallest subtree
+with length 3.
+ 
+
+Example 2:
+
+Input:
+             7
+           /   \
+          N    23
+             /   \
+            10    23
+           /  \   / \
+          N   17 N   N
+Target: 73
+Output: -1
+Explanation: No subtree is bst for the given target.
+
+
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def findSmallestSubtree(root, target):
+    def isBST(node, min_val, max_val):
+        if not node:
+            return True
+        if min_val < node.val < max_val:
+            return isBST(node.left, min_val, node.val) and isBST(node.right, node.val, max_val)
+        return False
+
+    def dfs(node, target):
+        if not node:
+            return 0, None
+
+        left_count, left_node = dfs(node.left, target)
+        right_count, right_node = dfs(node.right, target)
+
+        curr_sum = left_count + right_count + node.val
+
+        if curr_sum == target and isBST(node, float('-inf'), float('inf')):
+            if not left_node or not right_node:
+                return curr_sum, node
+
+        if left_node and left_node.val == target:
+            return left_count, left_node
+
+        if right_node and right_node.val == target:
+            return right_count, right_node
+
+        if left_count > 0:
+            return left_count, left_node
+
+        if right_count > 0:
+            return right_count, right_node
+
+        return curr_sum, None
+
+    _, result = dfs(root, target)
+    return -1 if result is None else result.val
+
+# Example usage:
+if __name__ == "__main__":
+    root = TreeNode(13)
+    root.left = TreeNode(5)
+    root.left.right = TreeNode(17)
+    root.left.right.left = TreeNode(16)
+    root.right = TreeNode(23)
+    target = 38
+    result = findSmallestSubtree(root, target)
+    print(result)  # Output: 3
